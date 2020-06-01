@@ -14,7 +14,7 @@ export class DataStorageService {
     const recipes = this.recipeService.getRecipes();
     this.http
       .put(
-        environment.API,
+          environment.API,
         recipes
       )
       .subscribe(response => {
