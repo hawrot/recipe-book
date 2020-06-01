@@ -20,7 +20,7 @@ export class AuthService{
     }
 
     signUp(email: string, password: string){
-       return this.http.post(environment.AUTH_SIGN_UP, {
+       return this.http.post<AuthResponseData>(environment.AUTH_SIGN_UP, {
             email: email,
             password: password,
             returnSecureToken: true
