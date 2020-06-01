@@ -2,6 +2,16 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 
+interface AuthResponseData {
+    kind :string,
+    idToken: string,
+    email : string,
+    refreshToken : string,
+    expiresIn : string,
+    localId: string;
+
+}
+
 @Injectable({providedIn: 'root'})
 export class AuthService{
 
@@ -10,11 +20,12 @@ export class AuthService{
     }
 
     signUp(email: string, password: string){
-        this.http.post(environment.AUTH_SIGN_UP, {
+       return this.http.post(environment.AUTH_SIGN_UP, {
             email: email,
             password: password,
             returnSecureToken: true
-        })
+        }
+        );
     }
 
 }
