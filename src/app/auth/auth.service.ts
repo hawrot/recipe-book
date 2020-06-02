@@ -20,33 +20,22 @@ export interface AuthResponseData {
 export class AuthService {
     user = new BehaviorSubject<User>(null);
 
+    constructor(private http: HttpClient) {}
 
-
-    constructor(private http: HttpClient) {
-    }
-
-    signUp(email: string, password: string) {
-        return this.http.post<AuthResponseData>(environment.AUTH_SIGN_UP, {
-                email: email,
-                password: password,
-                returnSecureToken: true
-            }
-        ).pipe(catchError(this.handleError), tap(resData => {
-            this.handleAuth(resData.email, resData.idToken, resData.localId, +resData.expiresIn)
-        }));
-    }
-
-    login(email: string, password: string) {
-        return this.http.post<AuthResponseData>(environment.AUTH_LOGIN,  {
-                email: email,
-                password: password,
-                returnSecureToken: true
-            }
-        )
+    signup(email: string, password: string) {
+        return this.http
+            .post<AuthResponseData>(
+                environment.AUTH_SIGN_UP,
+                {
+                    email: email,
+                    password: password,
+                    returnSecureToken: true
+                }
+            )
             .pipe(
                 catchError(this.handleError),
                 tap(resData => {
-                    this.handleAuth(
+                    this.handleAuthentication(
                         resData.email,
                         resData.localId,
                         resData.idToken,
@@ -56,32 +45,56 @@ export class AuthService {
             );
     }
 
-    private handleAuth(email: string, token: string, userId: string, expiresIn : number){
+    login(email: string, password: string) {
+        return this.http
+            .post<AuthResponseData>(
+                environment.AUTH_LOGIN,
+                {
+                    email: email,
+                    password: password,
+                    returnSecureToken: true
+                }
+            )
+            .pipe(
+                catchError(this.handleError),
+                tap(resData => {
+                    this.handleAuthentication(
+                        resData.email,
+                        resData.localId,
+                        resData.idToken,
+                        +resData.expiresIn
+                    );
+                })
+            );
+    }
+
+    private handleAuthentication(
+        email: string,
+        userId: string,
+        token: string,
+        expiresIn: number
+    ) {
         const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
         const user = new User(email, userId, token, expirationDate);
         this.user.next(user);
-
     }
 
     private handleError(errorRes: HttpErrorResponse) {
-        let errorMessage = 'An unknown error occurred';
+        let errorMessage = 'An unknown error occurred!';
         if (!errorRes.error || !errorRes.error.error) {
             return throwError(errorMessage);
         }
-        console.log(errorRes);
         switch (errorRes.error.error.message) {
             case 'EMAIL_EXISTS':
-                errorMessage = 'This email exists'
+                errorMessage = 'This email exists already';
                 break;
-             case 'EMAIL_NOT_FOUND':
-                errorMessage = 'This email not exists'
+            case 'EMAIL_NOT_FOUND':
+                errorMessage = 'This email does not exist.';
                 break;
-             case 'INVALID_PASSWORD':
-                errorMessage = 'This password or email is invalid'
+            case 'INVALID_PASSWORD':
+                errorMessage = 'This password is not correct.';
                 break;
-
         }
         return throwError(errorMessage);
     }
-
 }
