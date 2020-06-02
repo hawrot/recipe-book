@@ -36,13 +36,23 @@ export class AuthService {
     }
 
     login(email: string, password: string) {
-        return this.http.post<AuthResponseData>(environment.AUTH_LOGIN, {
-            email: email,
-            password: password,
-            returnSecureToken: true
-        }).pipe(catchError(this.handleError), tap(resData => {
-            this.handleAuth(resData.email, resData.idToken, resData.localId, +resData.expiresIn)
-        }));
+        return this.http.post<AuthResponseData>(environment.AUTH_LOGIN,  {
+                email: email,
+                password: password,
+                returnSecureToken: true
+            }
+        )
+            .pipe(
+                catchError(this.handleError),
+                tap(resData => {
+                    this.handleAuth(
+                        resData.email,
+                        resData.localId,
+                        resData.idToken,
+                        +resData.expiresIn
+                    );
+                })
+            );
     }
 
     private handleAuth(email: string, token: string, userId: string, expiresIn : number){
