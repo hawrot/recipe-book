@@ -9,6 +9,7 @@ import {Subscription} from "rxjs";
   templateUrl: './header.component.html'
 })
 export class HeaderComponent implements OnInit, OnDestroy{
+  private isAuthenticated = false;
   private userSub : Subscription;
 
   constructor(private dataStorageService: DataStorageService, private authService: AuthService) {}
@@ -22,7 +23,9 @@ export class HeaderComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
-   this.userSub =  this.authService.user.subscribe();
+   this.userSub =  this.authService.user.subscribe(user => {
+     this.isAuthenticated = !user ? false : true;
+   });
   }
 
   ngOnDestroy(): void {
